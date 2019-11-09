@@ -16,3 +16,17 @@ jobs:
 
       - name: Run Testsuite
         run: vendor/bin/phpunit --configuration dev/phpunit.xml
+
+  phpstan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Composer dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+
+      - name: Run Phpstan
+        run: vendor/bin/phpstan analyze -c dev/phpstan.neon --no-progress
