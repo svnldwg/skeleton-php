@@ -1,1 +1,1 @@
-# skeleton-php
+# skeleton-php-docker

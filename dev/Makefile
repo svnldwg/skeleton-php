@@ -1,0 +1,76 @@
+#CONFIGURATION
+export PROJECT_IP = 127.0.0.1
+export PROJECT_DOMAIN = skeleton.dev.local
+export PROJECT_NAME = skeleton
+export SHELL = bash
+
+export VERSION = 0.0.1
+
+#xdebug
+export HOST_PORT = 9000
+
+#DOCKER COMPOSE SETTINGS
+export PHP_IDE_CONFIG = serverName=${PROJECT_DOMAIN}
+
+export ENVIRONMENT=dev
+
+#DOCKER
+DOCKER = docker
+DOCKER_COMPOSE = docker-compose -f docker/docker-compose.yml
+CLI = $(DOCKER_COMPOSE) exec -T ${PROJECT_NAME}
+ROOT_CLI = $(DOCKER_COMPOSE) exec --user root -T ${PROJECT_NAME}
+CLI_D = $(DOCKER_COMPOSE) exec -T -d ${PROJECT_NAME}
+CLI_COMPOSER = $(DOCKER_COMPOSE) exec -T ${PROJECT_NAME} php -d memory_limit=-1 /usr/local/bin/composer
+CONSOLE = $(CLI) ./vendor/bin/console
+
+start: ##@development start project
+	$(DOCKER_COMPOSE) up -d
+.PHONY: start
+
+stop: ##@development stop project
+	$(DOCKER_COMPOSE) stop
+.PHONY: stop
+
+down: ##@development delete project container
+	$(DOCKER_COMPOSE) down
+.PHONY: down
+
+ps: ##@development show running container
+	$(DOCKER_COMPOSE) ps
+.PHONY: ps
+
+logs: ##@development show server logs
+	$(DOCKER_COMPOSE) logs -f
+.PHONY: logs
+
+cli: ##@development get shell
+	$(DOCKER_COMPOSE) exec ${PROJECT_NAME} $(SHELL)
+.PHONY: cli
+
+composer-install: composer-token ##@development run composer install
+	$(CLI_COMPOSER) install --ansi
+.PHONY: composer-install
+
+composer-dev-update: composer-token ##@development run composer update
+	$(CLI_COMPOSER) update --ansi
+.PHONY: composer-dev-update
+
+composer-update: composer-token ##@development run composer update
+	$(CLI_COMPOSER) update
+.PHONY: composer-update
+
+composer-dump-autoload: ##@development run composer dump-autoload
+	$(CLI_COMPOSER) dump-autoload -a
+.PHONY: composer-dump-autoload
+
+setup: start ##@development configure development environment
+	grep -q -F "${PROJECT_IP} ${PROJECT_DOMAIN}" /etc/hosts || sudo sh -c "echo '${PROJECT_IP} ${PROJECT_DOMAIN}' >> /etc/hosts"
+	$(DOCKER_COMPOSE) restart ${PROJECT_NAME}
+.PHONY: setup
+
+clean: down ##@other clean up project (docker images and settings)
+	@[[ -z `$(DOCKER) images -q docker_${PROJECT_NAME}` ]] || $(DOCKER) rmi docker_${PROJECT_NAME}
+	@[[ -z `$(DOCKER) images -q --filter dangling=true` ]] || $(DOCKER) rmi `$(DOCKER) images --filter dangling=true --quiet`
+	@[[ -z `$(DOCKER) images | grep "^<none>"` ]] || $(DOCKER) rmi `docker images | grep "^<none>" | awk "{print $3}"`
+	@sudo sed -i '' "/${PROJECT_NAME}/d" /etc/hosts
+.PHONY: clean
