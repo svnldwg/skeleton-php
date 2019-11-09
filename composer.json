@@ -1,0 +1,16 @@
+{
+  "name": "svnldwg/skeleton-php-docker",
+  "description": "Basic skeleton with docker setup, php, mysql",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Sven Ludwig",
+      "email": "s.ludwig.g@gmail.com"
+    }
+  ],
+  "require-dev": {
+    "phpstan/phpstan": "0.11.19",
+    "friendsofphp/php-cs-fixer": "v2.16.0"
+  }
+}

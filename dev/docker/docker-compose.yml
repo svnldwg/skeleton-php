@@ -11,11 +11,12 @@ services:
     ports:
       - "9906:3306"
   skeleton:
-    image: php:7.3-apache
+    build: .
     depends_on:
       - db
     volumes:
       - ../../public/:/var/www/html/
+      - ../../:/var/www/
     ports:
       - "8100:80"
     stdin_open: true
