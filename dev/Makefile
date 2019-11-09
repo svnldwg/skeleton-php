@@ -4,8 +4,6 @@ export PROJECT_DOMAIN = skeleton.dev.local
 export PROJECT_NAME = skeleton
 export SHELL = bash
 
-export VERSION = 0.0.1
-
 #xdebug
 export HOST_PORT = 9000
 
@@ -18,7 +16,6 @@ export ENVIRONMENT=dev
 DOCKER = docker
 DOCKER_COMPOSE = docker-compose -f docker/docker-compose.yml
 CLI = $(DOCKER_COMPOSE) exec -T ${PROJECT_NAME}
-ROOT_CLI = $(DOCKER_COMPOSE) exec --user root -T ${PROJECT_NAME}
 CLI_D = $(DOCKER_COMPOSE) exec -T -d ${PROJECT_NAME}
 CLI_COMPOSER = $(DOCKER_COMPOSE) exec -T ${PROJECT_NAME} php -d memory_limit=-1 /usr/local/bin/composer
 CONSOLE = $(CLI) ./vendor/bin/console
@@ -47,15 +44,11 @@ cli: ##@development get shell
 	$(DOCKER_COMPOSE) exec ${PROJECT_NAME} $(SHELL)
 .PHONY: cli
 
-composer-install: composer-token ##@development run composer install
+composer-install: ##@development run composer install
 	$(CLI_COMPOSER) install --ansi
 .PHONY: composer-install
 
-composer-dev-update: composer-token ##@development run composer update
-	$(CLI_COMPOSER) update --ansi
-.PHONY: composer-dev-update
-
-composer-update: composer-token ##@development run composer update
+composer-update: ##@development run composer update
 	$(CLI_COMPOSER) update
 .PHONY: composer-update
 
@@ -74,3 +67,11 @@ clean: down ##@other clean up project (docker images and settings)
 	@[[ -z `$(DOCKER) images | grep "^<none>"` ]] || $(DOCKER) rmi `docker images | grep "^<none>" | awk "{print $3}"`
 	@sudo sed -i '' "/${PROJECT_NAME}/d" /etc/hosts
 .PHONY: clean
+
+phpstan: ##@development run phpstan
+	$(CLI) ./vendor/bin/phpstan analyze -c dev/phpstan.neon
+.PHONY: phpstan
+
+php-cs-fixer: ##@development run php-cs-fixer
+	$(CLI) ./vendor/bin/php-cs-fixer fix --config=dev/csfixer.php_cs
+.PHONY: php-cs-fixer
