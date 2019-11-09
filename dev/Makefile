@@ -17,7 +17,7 @@ DOCKER = docker
 DOCKER_COMPOSE = docker-compose -f docker/docker-compose.yml
 CLI = $(DOCKER_COMPOSE) exec -T ${PROJECT_NAME}
 CLI_D = $(DOCKER_COMPOSE) exec -T -d ${PROJECT_NAME}
-CLI_COMPOSER = $(DOCKER_COMPOSE) exec -T ${PROJECT_NAME} php -d memory_limit=-1 /usr/local/bin/composer
+CLI_COMPOSER = $(DOCKER_COMPOSE) exec -T ${PROJECT_NAME} php -d memory_limit=-1 /usr/bin/composer
 CONSOLE = $(CLI) ./vendor/bin/console
 
 start: ##@development start project
@@ -75,3 +75,10 @@ phpstan: ##@development run phpstan
 php-cs-fixer: ##@development run php-cs-fixer
 	$(CLI) ./vendor/bin/php-cs-fixer fix --config=dev/csfixer.php_cs
 .PHONY: php-cs-fixer
+
+phpunit: ##@development run phpunit
+	$(CLI) ./vendor/bin/phpunit --configuration dev/phpunit.xml
+.PHONY: phpunit
+
+codecheck: php-cs-fixer phpstan phpunit
+.PHONY: codecheck
