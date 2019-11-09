@@ -11,7 +11,11 @@ services:
     ports:
       - "9906:3306"
   skeleton:
-    build: .
+    build:
+      context: .
+      args:
+        - WITH_XDEBUG=true
+    env_file: ../.env
     depends_on:
       - db
     volumes:
